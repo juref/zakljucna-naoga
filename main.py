@@ -9,9 +9,12 @@ import time
 import jinja2
 import webapp2
 import logging
+import json
+
+
 from models import MailMessage
 from HTMLParser import HTMLParser
-from google.appengine.api import users
+from google.appengine.api import users, urlfetch
 
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -64,13 +67,24 @@ class MainHandler(BaseHandler):
         mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
         today = datetime.datetime.now()
 
+        city = "Ljubljana"
+        units = "metric"
+        app_key = "35cf7783d824223bb27c01a20ea797b8"
+
+        url = "http://api.openweathermap.org/data/2.5/weather?q={0}&units={1}&appid={2}".format(city, units, app_key)
+
+        result = urlfetch.fetch(url)
+
+        weather_info = json.loads(result.content)
+
+
         if user:
             logiran = True
             logout_url = users.create_logout_url('/')
             myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
 
             params = {"myMessages": myMessages, "today": today, "mailList": mailList, "logiran": logiran, "user": user,
-                      "logout_url": logout_url}
+                      "logout_url": logout_url, "weather_info":weather_info}
         else:
             logiran = False
             login_url = users.create_login_url('/')
@@ -102,11 +116,11 @@ class AddMailMessageHandler(BaseHandler):
 
     def post(self):
         user = users.get_current_user()
-        mailRecipient = self.request.get("mailRecipient")
-        mailSubject = self.request.get("mailSubject")
-        mailBody = self.request.get("mailBody")
-        mailSender = self.request.get("mailSender")
-        mailSender_ID = self.request.get("mailSender_ID")
+        mailRecipient = self.request.get
+        mailSubject = self.request.get
+        mailBody = self.request.get
+        mailSender = self.request.get
+        mailSender_ID = self.request.get
         today = datetime.datetime.now()
         mailBodyExcerpt = strip_tags(mailBody)[0:150]
 
@@ -148,11 +162,11 @@ class ReplayMailMessageHandler(BaseHandler):
 
     def post(self, message_id):
         user = users.get_current_user()
-        mailRecipient = self.request.get("mailRecipient")
-        mailSubject = self.request.get("mailSubject")
-        mailBody = self.request.get("mailBody")
-        mailSender = self.request.get("mailSender")
-        mailSender_ID = self.request.get("mailSender_ID")
+        mailRecipient = self.request.get
+        mailSubject = self.request.get
+        mailBody = self.request.get
+        mailSender = self.request.get
+        mailSender_ID = self.request.get
         today = datetime.datetime.now()
         mailBodyExcerpt = strip_tags(mailBody)[0:150]
 

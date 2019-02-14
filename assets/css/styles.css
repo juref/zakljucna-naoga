@@ -9,7 +9,9 @@ body {
     padding-top: 49px;
     padding-top: 49px;
 }
-
+.main-content   {
+    margin-top: -25x;
+}
 .bmail-header {
     position: fixed;
     top: 0;
@@ -265,4 +267,84 @@ table.outbox-table td:last-child {
 }
 .table-deleted a:hover {
     color: #ffc107;
+}
+.weather {
+    /* position: relative; */
+    margin-top: 50;
+    height: 50px;
+    line-height: 50px;
+    padding-left: 10px;
+    /* width: 75px; */
+    right: 0;
+    background-color: yellow;
+    opacity: 0.75;
+    transition: opacity 0.25s ease-in-out;
+}
+.weather.unactive {
+    opacity: 0;
+}
+.weather-switch {
+    display: inline;
+}
+/**** Switch ****/
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 35px;
+    height: 18px;
+    transform: rotate(180deg);
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: green;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 4px;
+    bottom: 2px;
+    background-color: white;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+}
+
+input:checked + .slider {
+    background-color: #ccc;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px green;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(13px);
+    -ms-transform: translateX(13px);
+    transform: translateX(13px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
 }

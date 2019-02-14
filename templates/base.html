@@ -75,8 +75,13 @@
                         </ul>
 
                         <div class="col-4 login">
+                            <div class="weather-switch">
+                            <label class="switch">
+                                <input type="checkbox" checked="checked">
+                                <span class="slider round"></span>
+                            </label><span> weather</span></div>
                             {% if logiran %}
-                                {{ user.email() }}
+                                &nbsp;|&nbsp;{{ user.email() }}
                                 |
                                 <a href="{{ logout_url }}">
                                     <i class="fas fa-sign-out-alt"></i>
@@ -92,23 +97,30 @@
                     </div>
                 </div>
             </div>
+            <div class="container">
+                <div class="weather unactive">
+                    <p>Weather in {{ weather_info.name }} | {{ weather_info.weather[0].description }} | Temperature: {{ weather_info.main.temp }} °C</p>
+                </div>
+            </div>
             <div class="container main-content">
                 <div class="row">
-
                     {% block specifika %}{% endblock specifika %}
 
                 </div>
             </div>
             <div class="push"></div>
         </div>
-                <div class="container-fluid bmail-footer">
-                    <div class="container">
-                        Copyright by wanna be SmartNinja @2019
-                    </div>
-                </div>
+        <div class="container-fluid bmail-footer">
+            <div class="container">
+                Copyright by wanna be SmartNinja @2019
+            </div>
+        </div>
 
         <script type="text/javascript">
-            
+            $(".slider").click(function () {
+                $(".weather").toggleClass("unactive");
+            });
+
             jQuery(document).ready(function ($) {
                 $(".clickable-row").click(function () {
                     window.location = $(this).data("href");
