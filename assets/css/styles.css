@@ -348,3 +348,17 @@ input:checked + .slider:before {
 .slider.round:before {
     border-radius: 50%;
 }
+.login-page {
+    margin-top: -50px;
+    padding-top: 50%;
+    background-color: #313131;
+    color: #ccc;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    height: calc(100% + 50px);
+
+}
+.login-page a {
+    font-size: 3.5em;
+}
