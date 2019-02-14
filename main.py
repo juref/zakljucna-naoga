@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# encoding=utf8
 import datetime
 import sys
 import os
@@ -10,8 +9,6 @@ import jinja2
 import webapp2
 import logging
 import json
-
-
 from models import MailMessage
 from HTMLParser import HTMLParser
 from google.appengine.api import users, urlfetch
@@ -42,6 +39,26 @@ template_dir = os.path.join(os.path.dirname(__file__), "templates")
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir), autoescape=False)
 
 
+def FetchWeather():
+    city = "Ljubljana"
+    units = "metric"
+    app_key = "35cf7783d824223bb27c01a20ea797b8"
+    url = "http://api.openweathermap.org/data/2.5/weather?q={0}&units={1}&appid={2}".format(city, units, app_key)
+    result = urlfetch.fetch(url)
+    weather = json.loads(result.content)
+
+    return weather
+
+
+def GoToLogin():
+    logiran = False
+    login_url = users.create_login_url('/')
+    weather_info = FetchWeather()
+    params = {"logiran": logiran, "login_url": login_url, "weather_info": weather_info}
+
+    return params
+
+
 class BaseHandler(webapp2.RequestHandler):
 
     def write(self, *a, **kw):
@@ -64,19 +81,12 @@ class BaseHandler(webapp2.RequestHandler):
 class MainHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
-        mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
+
         today = datetime.datetime.now()
 
-        city = "Ljubljana"
-        units = "metric"
-        app_key = "35cf7783d824223bb27c01a20ea797b8"
+        weather_info = FetchWeather()
 
-        url = "http://api.openweathermap.org/data/2.5/weather?q={0}&units={1}&appid={2}".format(city, units, app_key)
-
-        result = urlfetch.fetch(url)
-
-        weather_info = json.loads(result.content)
-
+        mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
 
         if user:
             logiran = True
@@ -84,12 +94,9 @@ class MainHandler(BaseHandler):
             myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
 
             params = {"myMessages": myMessages, "today": today, "mailList": mailList, "logiran": logiran, "user": user,
-                      "logout_url": logout_url, "weather_info":weather_info}
+                      "logout_url": logout_url, "weather_info": weather_info}
         else:
-            logiran = False
-            login_url = users.create_login_url('/')
-
-            params = {"logiran": logiran, "login_url": login_url}
+            params = GoToLogin()
 
         self.html = "index.html"
         return self.render_template("%s" % self.html, params=params)
@@ -100,29 +107,31 @@ class AddMailMessageHandler(BaseHandler):
         user = users.get_current_user()
         mailList = MailMessage.query(MailMessage.mailDeleted == False).fetch()
         task = ""
+
+        weather_info = FetchWeather()
+
         if user:
             logiran = True
             logout_url = users.create_logout_url('/')
 
-            params = {"mailList": mailList, "task": task, "logiran": logiran, "user": user, "logout_url": logout_url}
+            params = {"task": task, "logiran": logiran, "user": user, "logout_url": logout_url, "weather_info": weather_info}
         else:
-            logiran = False
-            login_url = users.create_login_url('/')
-
-            params = {"mailList": mailList, "task": task, "logiran": logiran, "user": user, "login_url": login_url}
+            params = GoToLogin()
 
         self.html = "add.html"
         return self.render_template("%s" % self.html, params=params)
 
     def post(self):
         user = users.get_current_user()
-        mailRecipient = self.request.get
-        mailSubject = self.request.get
-        mailBody = self.request.get
-        mailSender = self.request.get
-        mailSender_ID = self.request.get
+        mailRecipient = self.request.get("mailRecipient")
+        mailSubject = self.request.get("mailSubject")
+        mailBody = self.request.get("mailBody")
+        mailSender = self.request.get("mailSender")
+        mailSender_ID = self.request.get("mailSender_ID")
         today = datetime.datetime.now()
         mailBodyExcerpt = strip_tags(mailBody)[0:150]
+
+        weather_info = FetchWeather()
 
         newMailMessage = MailMessage(mailRecipient=mailRecipient, mailSender_ID=mailSender_ID, mailSubject=mailSubject,
                                      mailBody=mailBody, mailBodyExcerpt=mailBodyExcerpt, mailSender=mailSender)
@@ -136,16 +145,9 @@ class AddMailMessageHandler(BaseHandler):
 
             mailList = MailMessage.query(MailMessage.mailDeleted == False).fetch()
 
-            params = {"mailList": mailList, "logiran": logiran, "user": user, "logout_url": logout_url, "today": today}
+            params = {"mailList": mailList, "logiran": logiran, "user": user, "logout_url": logout_url, "today": today, "weather_info": weather_info}
         else:
-            logiran = False
-            login_url = users.create_login_url('/')
-
-            time.sleep(1)
-
-            mailList = MailMessage.query(MailMessage.mailDeleted == False).fetch()
-
-            params = {"mailList": mailList, "logiran": logiran, "user": user, "login_url": login_url, "today": today}
+            params = GoToLogin()
 
         self.html = "index.html"
         return self.render_template("%s" % self.html, params=params)
@@ -155,20 +157,25 @@ class ReplayMailMessageHandler(BaseHandler):
     def get(self, message_id):
         user = users.get_current_user()
         mail = MailMessage.get_by_id(int(message_id))
-        params = {"mail": mail, "user": user}
+
+        weather_info = FetchWeather()
+
+        params = {"mail": mail, "user": user, "weather_info": weather_info}
 
         self.html = "replay.html"
         return self.render_template("%s" % self.html, params=params)
 
     def post(self, message_id):
         user = users.get_current_user()
-        mailRecipient = self.request.get
-        mailSubject = self.request.get
-        mailBody = self.request.get
-        mailSender = self.request.get
-        mailSender_ID = self.request.get
+        mailRecipient = self.request.get("mailRecipient")
+        mailSubject = self.request.get("mailSubject")
+        mailBody = self.request.get("mailBody")
+        mailSender = self.request.get("mailSender")
+        mailSender_ID = self.request.get("mailSender_ID")
         today = datetime.datetime.now()
         mailBodyExcerpt = strip_tags(mailBody)[0:150]
+
+        weather_info = FetchWeather()
 
         newMailMessage = MailMessage(mailRecipient=mailRecipient, mailSender_ID=mailSender_ID, mailSubject=mailSubject,
                                      mailBody=mailBody, mailBodyExcerpt=mailBodyExcerpt, mailSender=mailSender)
@@ -182,16 +189,9 @@ class ReplayMailMessageHandler(BaseHandler):
 
             mailList = MailMessage.query(MailMessage.mailDeleted == False).fetch()
 
-            params = {"mailList": mailList, "logiran": logiran, "user": user, "logout_url": logout_url, "today": today}
+            params = {"mailList": mailList, "logiran": logiran, "user": user, "logout_url": logout_url, "today": today, "weather_info": weather_info}
         else:
-            logiran = False
-            login_url = users.create_login_url('/')
-
-            time.sleep(1)
-
-            mailList = MailMessage.query(MailMessage.mailDeleted == False).fetch()
-
-            params = {"mailList": mailList, "logiran": logiran, "user": user, "login_url": login_url, "today": today}
+            params = GoToLogin()
 
         self.html = "index.html"
         return self.render_template("%s" % self.html, params=params)
@@ -200,7 +200,11 @@ class ReplayMailMessageHandler(BaseHandler):
 class DeleteMailHandler(BaseHandler):
     def get(self, message_id):
         mail = MailMessage.get_by_id(int(message_id))
-        params = {"mail": mail}
+
+        weather_info= FetchWeather()
+
+        params = {"mail": mail, "weather_info":weather_info}
+
 
         return self.render_template("delete.html", params=params)
 
@@ -209,8 +213,7 @@ class DeleteMailHandler(BaseHandler):
         user = users.get_current_user()
         usermail = user.email()
 
-        logging.info(usermail)
-        logging.info(mail.mailSender)
+        weather_info = FetchWeather()
 
         if usermail == mail.mailSender:
             mail.mailOutDeleted = True
@@ -235,12 +238,9 @@ class DeleteMailHandler(BaseHandler):
             myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
 
             params = {"myMessages": myMessages, "today": today, "mailList": mailList, "logiran": logiran, "user": user,
-                      "logout_url": logout_url, "notice": notice, "style":style}
+                      "logout_url": logout_url, "notice": notice, "style":style, "weather_info": weather_info}
         else:
-            logiran = False
-            login_url = users.create_login_url('/')
-
-            params = {"logiran": logiran, "login_url": login_url}
+            params = GoToLogin()
 
         self.html = "index.html"
         return self.render_template("%s" % self.html, params=params)
@@ -255,6 +255,8 @@ class MessageHandler(BaseHandler):
         timeSinceSendMinutes = str(today - mail.mailDate).split(":")[1]
         timeSinceSendHours = str(today - mail.mailDate).split(":")[0]
         timeSinceSendDays = str(today - mail.mailDate).split(",")[0]
+
+        weather_info = FetchWeather()
 
         if "days" in timeSinceSendDays:
             timeSinceSend = timeSinceSendDays
@@ -274,12 +276,9 @@ class MessageHandler(BaseHandler):
             mail.put()
 
             params = {"mail": mail, "logiran": logiran, "user": user, "logout_url": logout_url, "today": today,
-                      "timeSinceSend": timeSinceSend}
+                      "timeSinceSend": timeSinceSend, "weather_info": weather_info}
         else:
-            logiran = False
-            login_url = users.create_login_url('/')
-
-            params = {"logiran": logiran, "user": user, "login_url": login_url}
+            params = GoToLogin()
 
         self.html = "message.html"
         return self.render_template("%s" % self.html, params=params)
@@ -291,17 +290,16 @@ class SendMessageHandler(BaseHandler):
         mail = MailMessage.get_by_id(int(message_id))
         today = datetime.datetime.now()
 
+        weather_info = FetchWeather()
+
         if user:
             logiran = True
             logout_url = users.create_logout_url('/')
 
-            params = {"mail": mail, "logiran": logiran, "user": user, "logout_url": logout_url, "today": today}
+            params = {"mail": mail, "logiran": logiran, "user": user, "logout_url": logout_url, "today": today, "weather_info": weather_info}
 
         else:
-            logiran = False
-            login_url = users.create_login_url('/')
-
-            params = {"logiran": logiran, "user": user, "login_url": login_url}
+            params = GoToLogin()
 
         self.html = "message.html"
         return self.render_template("%s" % self.html, params=params)
@@ -335,10 +333,7 @@ class DeleteSendMailHandler(BaseHandler):
             params = {"myMessages": myMessages, "today": today, "mailList": mailList, "logiran": logiran, "user": user,
                       "logout_url": logout_url, "notice": notice, "style":style}
         else:
-            logiran = False
-            login_url = users.create_login_url('/')
-
-            params = {"logiran": logiran, "login_url": login_url}
+            params = GoToLogin()
 
         self.html = "index.html"
         return self.render_template("%s" % self.html, params=params)
@@ -350,6 +345,8 @@ class RestoreDeletedMailHandler(BaseHandler):
         user = users.get_current_user()
         mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
         today = datetime.datetime.now()
+
+        weather_info = FetchWeather()
 
         if user:
             logiran = True
@@ -364,12 +361,9 @@ class RestoreDeletedMailHandler(BaseHandler):
 
             params = {"notice": notice, "myMessages": myMessages, "today": today, "mailList": mailList,
                       "logiran": logiran, "user": user,
-                      "logout_url": logout_url, "style":style}
+                      "logout_url": logout_url, "style":style, "weather_info":weather_info}
         else:
-            logiran = False
-            login_url = users.create_login_url('/')
-
-            params = {"logiran": logiran, "login_url": login_url}
+            params = GoToLogin()
 
         time.sleep(1)
 
@@ -384,7 +378,7 @@ class OutboxHandler(BaseHandler):
             -MailMessage.mailDate).fetch()
         today = datetime.datetime.now()
 
-        # logging.info(user)
+        weather_info = FetchWeather()
 
         if user:
             logiran = True
@@ -392,12 +386,9 @@ class OutboxHandler(BaseHandler):
             myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
 
             params = {"myMessages": myMessages, "today": today, "mailList": mailList, "logiran": logiran, "user": user,
-                      "logout_url": logout_url}
+                      "logout_url": logout_url, "weather_info":weather_info}
         else:
-            logiran = False
-            login_url = users.create_login_url('/')
-
-            params = {"logiran": logiran, "login_url": login_url}
+            params = GoToLogin()
 
         self.html = "outbox.html"
         return self.render_template("%s" % self.html, params=params)
@@ -409,19 +400,18 @@ class DeletedHandler(BaseHandler):
         mailList = MailMessage.query(MailMessage.mailDeleted == True).order(-MailMessage.mailDate).fetch()
         today = datetime.datetime.now()
 
+        weather_info = FetchWeather()
+
         if user:
             logiran = True
             logout_url = users.create_logout_url('/')
             myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
 
             params = {"myMessages": myMessages, "today": today, "mailList": mailList, "logiran": logiran, "user": user,
-                      "logout_url": logout_url}
+                      "logout_url": logout_url, "weather_info":weather_info}
         else:
-            logiran = False
-            login_url = users.create_login_url('/')
-
-            params = {"logiran": logiran, "login_url": login_url}
-
+            params = GoToLogin()
+            
         self.html = "deleted.html"
         return self.render_template("%s" % self.html, params=params)
 
