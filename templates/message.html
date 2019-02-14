@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Filton{% endblock title %}
+{% block specifika %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="row mb-3 row-hero-msg">
+                    <div class="row-hero">
+                        {{ mail.mailSubject }}
+                    </div>
+                </div>
+                <div class="row-meta">From:
+                    <span>{{ mail.mailSender }}</span><br/>Date:
+                    <span>{{ mail.mailDate.strftime('%d %B %Y') }}</span>
+                    at:
+                    <span>{{ mail.mailDate.strftime('%I:%M %p') }}</span>
+                    That's
+                    <span>{{ timeSinceSend }}</span>
+                    ago
+                </div>
+                <div class="mail-body">
+                    {{ mail.mailBody }}</div>
+                <div class="row">
+                    <div class="col-12">
+                        <br/>
+                        <a href="/">
+                            <button class="btn btn-dark" onclick="/"><< Back </button></a> <a
+                                href="/replay/{{ mail.key.id() }}"><button class="btn btn-dark"
+                                onclick="/">Replay</button> </a> <form class="btn-inline" method="post"
+                                action="/delete/{{ mail.key.id() }}"> <button class="btn
+                                btn-dark">Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock specifika %} 

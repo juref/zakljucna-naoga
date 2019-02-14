@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Bmail - new message{% endblock title %}
+
+{% block specifika %}
+
+    <div class="container">
+        <div class="container">
+            <div class="row-hero row-border">
+                Re: {{ mail.mailSubject }}
+            </div>
+            <div class="row">
+                <div class="col-12 new-padding">
+                    <div class="row mb-3 center">
+
+                    </div>
+                    <form class="rating-form" method="post">
+
+                        <div class="input-group mb-3">
+                            <div class="input-group mb-3">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="To"
+                                    id="mailRecipient"
+                                    name="mailRecipient"
+                                    value="{{ mail.mailRecipient }}">
+                            </div>
+
+                            <div class="input-group mb-3">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Subject"
+                                    id="mailSubject"
+                                    name="mailSubject"
+                                    value="Re: {{ mail.mailSubject }}">
+                            </div>
+                            <div class="input-group mb-3 mail-compose">
+                                <textarea
+                                    class="form-control"
+                                    id="froala-editor"
+                                    name="mailBody"><br/>
+
+                                    <div class="replay">{{ mail.mailSender }} on {{ mail.mailDate }} wrote:<br/>{{ mail.mailBody }}</div> </textarea>
+                            </div>
+
+                        </div>
+                        <input
+                            type="hidden"
+                            id="mailSender"
+                            name="mailSender"
+                            value="{{ user.email() }}">
+                        <input
+                            type="hidden"
+                            id="mailSender_ID"
+                            name="mailSender_ID"
+                            value="{{ user.user_id() }}">
+                        <button class="btn btn-dark" type="submit">Send</button>
+                        <a class="btn btn-dark" href="/">Back</a>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+{% endblock specifika %}

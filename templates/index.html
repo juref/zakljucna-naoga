@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Bmail{% endblock title %}
+{% block specifika %}
+    <div class="col-12">
+        <div class="row-hero">
+            Inbox
+        </div>
+        {% if notice %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-{{ style }} alert-dismissible fade show" role="alert">
+                        {{ notice }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        <div class="row">
+            <table class="table table-hover inbox-table" id="table">
+                <thead>
+                    <tr>
+                        <th style="width: 20%">From</th>
+                        <th style="width: 70%">Subject - Message</th>
+                        <th style="width:  10%">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in mailList %}
+                        {% if m.mailRecipient == user.email() %}
+                            {% if m.mailStatus != "read" %}
+                                <tr class='clickable-row bold-row' data-href='/message/{{ m.key.id() }}'>
+                                {% else %}
+                                    <tr class='clickable-row' data-href='/message/{{ m.key.id() }}'>
+                                    {% endif %}
+                                    <td class="sender">{{ m.mailSender }}</td>
+                                    <td class="subject-body">{{ m.mailSubject }}
+                                        -
+                                        <span>{{ m.mailBodyExcerpt }}</span></td>
+                                    <td>
+                                        {% if m
+                                            .mailDate
+                                            .strftime('%d. %m. %Y') == today
+                                            .strftime('%d. %m. %Y') %}
+                                            {{ m.mailDate.strftime('%I:%M %p') }}
+                                        {% else %}
+                                            {{ m.mailDate.strftime('%b %d') }}
+                                        {% endif %}
+                                    </td>
+                                {% else %}
+                                {% endif %}
+                            </tr>
+                        </a>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock specifika %}

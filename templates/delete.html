@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Delete movie{% endblock title %}
+
+{% block specifika %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="red">Do you realy want to remove "{{ mail.mailSubject }}" movie?</h1>
+                <form method="post">
+                    <br/>
+                    <button class="btn btn-danger" type="submit">Yes, remove it</button>
+                    <a class="btn btn-dark" href="/">Cancel!</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock specifika %}

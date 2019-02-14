@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Bmail{% endblock title %}
+{% block specifika %}
+    
+        <div class="container">
+            <div class="row">
+                {% if notice %}
+                    <div class="notice {{ classConfirm }}">{{ notice }}</div>
+                {% endif %}
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="row-hero">
+                        Outbox
+                    </div>
+                    <div class="row">
+                        <table class="table outbox-table" id="table">
+                            <thead class="table-header-border">
+                                <tr>
+                                    <th style="width: 20%">To</th>
+                                    <th style="width: 70%">Subject - Message</th>
+                                    <th style="width:  10%">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for m in mailList %}
+                                    {% if m.mailSender == user.email() %}
+                                        <tr class='clickable-row' data-href='/send-message/{{ m.key.id() }}'>
+                                            <td class="sender">{{ m.mailRecipient }}</td>
+                                            <td class="subject-body">{{ m.mailSubject }} - <span>{{ m.mailBodyExcerpt }}</span></td>
+                                            <td>
+                                                {% if m.mailDate.strftime('%d. %m. %Y') == today.strftime('%d. %m. %Y') %}
+                                                    {{ m.mailDate.strftime('%I:%M %p') }}
+                                                {% else %}
+                                                    {{ m.mailDate.strftime('%b %d') }}
+                                                {% endif %}
+                                            </td>
+                                        {% else %}
+                                        {% endif %}
+                                    </tr></a>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <a class="btn btn-dark" href="/"><< Back</a>
+        </div>
+    
+{% endblock specifika %}
