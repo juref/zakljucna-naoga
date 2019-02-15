@@ -15,4 +15,5 @@ class MailMessage(ndb.Model):
 
 
 class WeatherLocation(ndb.Model):
+    user = ndb.StringProperty()
     location = ndb.StringProperty()

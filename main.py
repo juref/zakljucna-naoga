@@ -49,7 +49,6 @@ def GetData():
 
     return data
 
-
 def FetchWeather():
     city = "Ljubljana"
     units = "metric"
@@ -59,7 +58,6 @@ def FetchWeather():
     weather = json.loads(result.content)
 
     return weather
-
 
 def GoToLogin():
     logiran = False
@@ -92,11 +90,6 @@ class BaseHandler(webapp2.RequestHandler):
 class MainHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
-
-        # Pridobim z GetData funkcijo in apendam paramsom
-        # today = datetime.datetime.now()
-        # weather_info = FetchWeather()
-        # mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
 
         if user:
             logiran = True
@@ -220,7 +213,6 @@ class DeleteMailHandler(BaseHandler):
 
         params = {"mail": mail, "weather_info":weather_info}
 
-
         return self.render_template("delete.html", params=params)
 
     def post(self, message_id):
@@ -241,13 +233,8 @@ class DeleteMailHandler(BaseHandler):
 
         user = users.get_current_user()
 
-        # mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
-        # today = datetime.datetime.now()
-
         notice = "Message successfully deleted!"
         style = "danger"
-
-        logging.info(notice)
 
         if user:
             logiran = True
@@ -305,15 +292,30 @@ class SendMessageHandler(BaseHandler):
     def get(self, message_id):
         user = users.get_current_user()
         mail = MailMessage.get_by_id(int(message_id))
-        today = datetime.datetime.now()
-
         weather_info = FetchWeather()
+        today = datetime.datetime.now()
+        timeSinceSendMinutes = str(today - mail.mailDate).split(":")[1]
+        timeSinceSendHours = str(today - mail.mailDate).split(":")[0]
+        timeSinceSendDays = str(today - mail.mailDate).split(",")[0]
+
+
+
+        if "days" in timeSinceSendDays:
+            timeSinceSend = timeSinceSendDays
+        elif int(timeSinceSendHours) == 0:
+            if int(timeSinceSendMinutes[0]) == 0:
+                timeSinceSend = timeSinceSendMinutes[1] + " minutes"
+            else:
+                timeSinceSend = timeSinceSendMinutes + " minutes"
+
+        else:
+            timeSinceSend = timeSinceSendHours + " hours"
 
         if user:
             logiran = True
             logout_url = users.create_logout_url('/')
 
-            params = {"mail": mail, "logiran": logiran, "user": user, "logout_url": logout_url, "today": today, "weather_info": weather_info}
+            params = {"mail": mail, "logiran": logiran, "user": user, "logout_url": logout_url, "today": today, "timeSinceSend": timeSinceSend, "weather_info": weather_info}
 
         else:
             params = GoToLogin()
@@ -337,8 +339,6 @@ class DeleteSendMailHandler(BaseHandler):
         time.sleep(1)
 
         user = users.get_current_user()
-        # mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
-        # today = datetime.datetime.now()
         notice = "Message successfully deleted!"
         style = "danger"
 
@@ -361,11 +361,6 @@ class RestoreDeletedMailHandler(BaseHandler):
     def get(self, message_id):
         mail = MailMessage.get_by_id(int(message_id))
         user = users.get_current_user()
-
-        # Pridobim z GetData funkcijo in apendam paramsom
-        # mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
-        # today = datetime.datetime.now()
-        # weather_info = FetchWeather()
 
         if user:
             logiran = True
@@ -394,8 +389,6 @@ class RestoreDeletedMailHandler(BaseHandler):
 class OutboxHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
-        # mailList = MailMessage.query(MailMessage.mailDeleted == False and MailMessage.mailOutDeleted == False).order(
-        #     -MailMessage.mailDate).fetch()
         mailList = MailMessage.query(MailMessage.mailDeleted == False and MailMessage.mailOutDeleted == False).fetch()
         today = datetime.datetime.now()
 
@@ -418,7 +411,6 @@ class OutboxHandler(BaseHandler):
 class DeletedHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
-        # mailList = MailMessage.query(MailMessage.mailDeleted == True).order(-MailMessage.mailDate).fetch()
         mailList = MailMessage.query(MailMessage.mailDeleted == True).fetch()
         today = datetime.datetime.now()
         weather_info = FetchWeather()
@@ -440,8 +432,6 @@ class DeletedHandler(BaseHandler):
 class WeatherLocationHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
-        city = WeatherLocation.location
-        logging.info(city)
 
         if user:
             logiran = True
@@ -457,11 +447,7 @@ class WeatherLocationHandler(BaseHandler):
         self.html = "location.html"
         return self.render_template("%s" % self.html, params=params)
 
-
     def post(self):
-        # user = users.get_current_user()
-
-
         city = self.request.get("city")
         units = "metric"
         app_key = "35cf7783d824223bb27c01a20ea797b8"
