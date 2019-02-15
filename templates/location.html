@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Bmail - inbox{% endblock title %}
+{% block specifika %}
+
+    <div class="location-page align-self-center">
+        <div class="container text-center">
+            <h1>Change location to</h1>
+            <form method="post">
+                <div class="input-group mb-3">
+                    <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Enter your location"
+                        name="city">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="submit">GO</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    {% endblock specifika %}

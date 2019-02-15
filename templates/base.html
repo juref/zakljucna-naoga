@@ -37,61 +37,76 @@
 
     <body>
         {% if logiran %}
-        <div class="wrapper">
-            <div class="container-fluid bmail-header">
-                <div class="container">
-                    <div class="row menu">
-                        <ul class="nav col-8">
-                            <li class="nav-item">
-                                <a class="nav-link" href="/"><img class="logo" src="/assets/img/bmail-logo-01.png"></a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/">
-                                    <i class="fas fa-envelope">
-                                        <span>
-                                            Inbox</span></i>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/outbox">
-                                    <i class="fas fa-paper-plane">
-                                        <span>
-                                            Sent</span></i>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/add">
-                                    <i class="fas fa-edit">
-                                        <span>
-                                            New</span></i>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/deleted">
-                                    <i class="fas fa-trash">
-                                        <span>
-                                            Deleted</span></i>
-                                </a>
-                            </li>
-                        </ul>
+            <div class="wrapper">
+                <div class="container-fluid bmail-header">
+                    <div class="container">
+                        <div class="row menu">
+                            <ul class="nav col-8">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/"><img class="logo" src="/assets/img/bmail-logo-01.png"></a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/">
+                                        <i class="fas fa-envelope">
+                                            <span>
+                                                Inbox</span></i>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/outbox">
+                                        <i class="fas fa-paper-plane">
+                                            <span>
+                                                Sent</span></i>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/add">
+                                        <i class="fas fa-edit">
+                                            <span>
+                                                New</span></i>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/deleted">
+                                        <i class="fas fa-trash">
+                                            <span>
+                                                Deleted</span></i>
+                                    </a>
+                                </li>
+                            </ul>
 
-                        <div class="col-4 login">
-                            <div class="weather-switch">
-                            <label class="switch">
-                                <input type="checkbox" checked="checked">
-                                <span class="slider round"></span>
-                            </label><span> weather</span></div>
-                                &nbsp;|&nbsp;{{ user.email() }} | <a href="{{ logout_url }}"><i class="fas fa-sign-out-alt"></i>Logout</a>
+                            <div class="col-4 login">
+                                <div class="weather-switch">
+                                    <label class="switch">
+                                        <input type="checkbox" checked="checked">
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <span>
+                                        weather</span></div>
+                                &nbsp;|&nbsp;<a href="{{ logout_url }}">
+                                    <i class="fas fa-sign-out-alt"></i>Logout</a>
+                            </div>
+
                         </div>
-
                     </div>
                 </div>
-            </div>
-            <div class="container">
-                <div class="weather unactive">
-                    <p>Weather in <strong>{{ weather_info.name }}</strong> | {{ weather_info.weather[0].description }} | Temperature: <strong>{{ weather_info.main.temp }}</strong> °C</p>
+                <div class="container">
+                    <div class="row">
+                        <div class="weather unactive col-10">
+                            Weather in
+                            <span>{{ weather_info.name }}</span>
+                            <img
+                                src="https://openweathermap.org/img/w/{{ weather_info.weather[0].icon }}.png">
+                            Temperature:
+                            <span>{{ weather_info.main.temp }}
+                                °C</span>
+                        </div>
+                        <div class="weather unactive col-2">
+                            <a href="/weather-location">Change location</a>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            
             <div class="container main-content">
                 <div class="row">
                     {% block specifika %}{% endblock specifika %}
@@ -105,28 +120,31 @@
                 Copyright by wanna be SmartNinja @2019
             </div>
         </div>
-        {% else %}
+    {% else %}
         <div class="login-page align-self-center">
             <div class="container text-center">
-                <h1>Wellcome to Bmail</h1><a href="{{ login_url }}">
-            <i class="fas fa-sign-in-alt"></i>
-            Login</a></div></div>
-        {% endif %}
+                <h1>Welcome to Bmail</h1>
+                <a href="{{ login_url }}">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Login</a>
+            </div>
+        </div>
+    {% endif %}
 
-        <script type="text/javascript">
-            $(".slider").click(function () {
-                $(".weather").toggleClass("unactive");
-            });
+    <script type="text/javascript">
+        $(".slider").click(function () {
+            $(".weather").toggleClass("unactive");
+        });
 
-            jQuery(document).ready(function ($) {
-                $(".clickable-row").click(function () {
-                    window.location = $(this).data("href");
-                });
+        jQuery(document).ready(function ($) {
+            $(".clickable-row").click(function () {
+                window.location = $(this).data("href");
             });
+        });
 
-            $(function () {
-                $('textarea#froala-editor').froalaEditor()
-            });
-        </script>
-    </body>
+        $(function () {
+            $('textarea#froala-editor').froalaEditor()
+        });
+    </script>
+</body>
 </html>

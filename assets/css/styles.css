@@ -1,7 +1,6 @@
 body,
 html {
     font-weight: 100;
-    /* background-color: #343a40; */
     height: 100%;
     margin: 0;
 }
@@ -41,13 +40,6 @@ body {
     padding-left: 0;
     padding-right: 0;
 }
-
-.nav {
-    /* background-color: #a1bbc3; */
-    /* padding-top: 10px;
-    padding-bottom: 10px; */
-}
-/* .fa, */
 .fas {
     color: #eaeaea;
 }
@@ -55,7 +47,6 @@ body {
     font-family: sans-serif;
     font-size: 0.7em;
 }
-
 .row-hero-msg {
     position: relative;
     border-bottom: solid 2px #d54b3d;
@@ -66,10 +57,6 @@ body {
 .rating-form {
     margin-top: 0;
 }
-/* .table td, 
-.table th {
-    padding: 0.75em 0;
-} */
 .login {
     font-size: 0.8em;
     color: #eaeaea;
@@ -106,7 +93,6 @@ a:hover .fas {
 .fa-sign-out-alt {
     font-size: 1.3em;
     vertical-align: -2px;
-
 }
 .btn-inline {
     display: inline;
@@ -118,16 +104,17 @@ a:hover .fas {
 .row {
     margin: 0;
 }
+.row.menu {
+    margin-left: 5px;
+}
 .bold-row {
     font-weight: 700;
     background-color: #f6f6f6;
 }
 .row-hero {
-    /* background-color: #f5f5f5; */
     padding-top: 30px;
     padding-bottom: 45px;
     padding-left: 10px;
-    /* text-align: center; */
     font-size: 42px;
     font-weight: 100;
     color: #676767;
@@ -157,7 +144,6 @@ a:hover .fas {
     padding: 20px;
     border: solid 1px #cccccc;
 }
-
 .warning {
     color: #ff0000;
     background-color: #ffe7e733;
@@ -165,12 +151,6 @@ a:hover .fas {
     outline: 0;
     box-shadow: 0 0 0 0.2rem rgba(255, 70, 70, 0.25);
 }
-
-.red {
-    color: #ff0000;
-    font-weight: 700;
-}
-
 #title {
     margin-top: 30px;
     margin-bottom: 60px;
@@ -178,25 +158,9 @@ a:hover .fas {
     font-size: 36px;
     font-weight: 700;
 }
-
 .center {
     align-items: center;
     justify-content: center;
-}
-
-#guest-list {
-    padding-bottom: 30px;
-}
-
-.notice {
-    color: red;
-    font-weight: 700;
-    font-size: 2em;
-    margin: auto;
-}
-
-.confirm {
-    color: green;
 }
 .input-group-text {
     min-width: 100px;
@@ -269,15 +233,22 @@ table.outbox-table td:last-child {
     color: #ffc107;
 }
 .weather {
+    flex-direction: row;
+    flex-wrap: wrap;
     margin-top: 50;
     height: 50px;
-    padding-left: 25px;
+    padding-left: 10px;
+    color: #463502;
     font-weight: 400;
     line-height: 50px;
     right: 0;
     background-color: #ffc107;
     opacity: 1;
     transition: opacity 0.5s ease-in-out;
+}
+.weather span {
+    font-size: 2em;
+    font-weight: 800;letter-spacing: -0.5px;
 }
 .weather.unactive {
     margin-top: 0;
@@ -286,8 +257,26 @@ table.outbox-table td:last-child {
 .weather-switch {
     display: inline;
 }
+.weather a {
+    color: #463502;
+    transition: color 0.25s ease-in-out;
+}
+.weather a:hover{
+    color: #d54b3d;
+}
+#location {
+    text-align: right;
+    float: right;
+    background-color: #ffc107;
+    border: none;
+    height: 50px;
+    margin-right: 10px;
+    transition: text-decoration 0.25sec ease-in-out;
+}
+.input-group.mb-3 {
+    margin-top: 7px;
+}
 /**** Switch ****/
-
 .switch {
     position: relative;
     display: inline-block;
@@ -295,13 +284,11 @@ table.outbox-table td:last-child {
     height: 18px;
     transform: rotate(180deg);
 }
-
 .switch input {
     opacity: 0;
     width: 0;
     height: 0;
 }
-
 .slider {
     position: absolute;
     cursor: pointer;
@@ -313,7 +300,6 @@ table.outbox-table td:last-child {
     -webkit-transition: 0.4s;
     transition: 0.4s;
 }
-
 .slider:before {
     position: absolute;
     content: "";
@@ -325,26 +311,21 @@ table.outbox-table td:last-child {
     -webkit-transition: 0.4s;
     transition: 0.4s;
 }
-
 input:checked + .slider {
     background-color: #ccc;
 }
-
 input:focus + .slider {
     box-shadow: 0 0 1px green;
 }
-
 input:checked + .slider:before {
     -webkit-transform: translateX(13px);
     -ms-transform: translateX(13px);
     transform: translateX(13px);
 }
-
 /* Rounded sliders */
 .slider.round {
     border-radius: 34px;
 }
-
 .slider.round:before {
     border-radius: 50%;
 }
@@ -357,8 +338,15 @@ input:checked + .slider:before {
     display: -ms-flexbox;
     display: flex;
     height: calc(100% + 50px);
-
 }
 .login-page a {
     font-size: 3.5em;
+}
+.location-page {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 25%;
+}
+.location-page h1 {
+    font-weight: 800;
 }

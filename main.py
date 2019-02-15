@@ -9,7 +9,7 @@ import jinja2
 import webapp2
 import logging
 import json
-from models import MailMessage
+from models import MailMessage, WeatherLocation
 from HTMLParser import HTMLParser
 from google.appengine.api import users, urlfetch
 
@@ -37,6 +37,16 @@ def strip_tags(html):
 
 template_dir = os.path.join(os.path.dirname(__file__), "templates")
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir), autoescape=False)
+
+
+def GetData():
+    mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
+    today = datetime.datetime.now()
+    weather_info = FetchWeather()
+
+    data = {"mailList": mailList, "today": today, "weather_info": weather_info}
+
+    return data
 
 
 def FetchWeather():
@@ -82,19 +92,19 @@ class MainHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
 
-        today = datetime.datetime.now()
-
-        weather_info = FetchWeather()
-
-        mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
+        # Pridobim z GetData funkcijo in apendam paramsom
+        # today = datetime.datetime.now()
+        # weather_info = FetchWeather()
+        # mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
 
         if user:
             logiran = True
             logout_url = users.create_logout_url('/')
             myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
 
-            params = {"myMessages": myMessages, "today": today, "mailList": mailList, "logiran": logiran, "user": user,
-                      "logout_url": logout_url, "weather_info": weather_info}
+            params = {"myMessages": myMessages, "logiran": logiran, "user": user,
+                      "logout_url": logout_url,}
+            params.update(GetData())
         else:
             params = GoToLogin()
 
@@ -105,7 +115,7 @@ class MainHandler(BaseHandler):
 class AddMailMessageHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
-        mailList = MailMessage.query(MailMessage.mailDeleted == False).fetch()
+        # mailList = MailMessage.query(MailMessage.mailDeleted == False).fetch()
         task = ""
 
         weather_info = FetchWeather()
@@ -142,7 +152,6 @@ class AddMailMessageHandler(BaseHandler):
             newMailMessage.put()
 
             time.sleep(1)
-
             mailList = MailMessage.query(MailMessage.mailDeleted == False).fetch()
 
             params = {"mailList": mailList, "logiran": logiran, "user": user, "logout_url": logout_url, "today": today, "weather_info": weather_info}
@@ -160,7 +169,13 @@ class ReplayMailMessageHandler(BaseHandler):
 
         weather_info = FetchWeather()
 
-        params = {"mail": mail, "user": user, "weather_info": weather_info}
+        if user:
+            logiran = True
+            logout_url = users.create_logout_url('/')
+
+            params = {"mail": mail, "user": user, "weather_info": weather_info, "logiran": logiran, "logout_url": logout_url}
+        else:
+            params = GoToLogin()
 
         self.html = "replay.html"
         return self.render_template("%s" % self.html, params=params)
@@ -225,8 +240,10 @@ class DeleteMailHandler(BaseHandler):
         time.sleep(1)
 
         user = users.get_current_user()
-        mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
-        today = datetime.datetime.now()
+
+        # mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
+        # today = datetime.datetime.now()
+
         notice = "Message successfully deleted! <a class='alert-link' href='/restore/" + str(mail.key.id()) + "'>Undo delete message</a>"
         style = "danger"
 
@@ -237,8 +254,9 @@ class DeleteMailHandler(BaseHandler):
             logout_url = users.create_logout_url('/')
             myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
 
-            params = {"myMessages": myMessages, "today": today, "mailList": mailList, "logiran": logiran, "user": user,
+            params = {"myMessages": myMessages,"logiran": logiran, "user": user,
                       "logout_url": logout_url, "notice": notice, "style":style, "weather_info": weather_info}
+            params.update(GetData())
         else:
             params = GoToLogin()
 
@@ -250,7 +268,6 @@ class MessageHandler(BaseHandler):
     def get(self, message_id):
         user = users.get_current_user()
         mail = MailMessage.get_by_id(int(message_id))
-        logging.info(user)
         today = datetime.datetime.now()
         timeSinceSendMinutes = str(today - mail.mailDate).split(":")[1]
         timeSinceSendHours = str(today - mail.mailDate).split(":")[0]
@@ -320,8 +337,8 @@ class DeleteSendMailHandler(BaseHandler):
         time.sleep(1)
 
         user = users.get_current_user()
-        mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
-        today = datetime.datetime.now()
+        # mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
+        # today = datetime.datetime.now()
         notice = "Message successfully deleted!"
         style = "danger"
 
@@ -330,8 +347,9 @@ class DeleteSendMailHandler(BaseHandler):
             logout_url = users.create_logout_url('/')
             myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
 
-            params = {"myMessages": myMessages, "today": today, "mailList": mailList, "logiran": logiran, "user": user,
+            params = {"myMessages": myMessages,"logiran": logiran, "user": user,
                       "logout_url": logout_url, "notice": notice, "style":style}
+            params.update(GetData())
         else:
             params = GoToLogin()
 
@@ -343,10 +361,11 @@ class RestoreDeletedMailHandler(BaseHandler):
     def get(self, message_id):
         mail = MailMessage.get_by_id(int(message_id))
         user = users.get_current_user()
-        mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
-        today = datetime.datetime.now()
 
-        weather_info = FetchWeather()
+        # Pridobim z GetData funkcijo in apendam paramsom
+        # mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
+        # today = datetime.datetime.now()
+        # weather_info = FetchWeather()
 
         if user:
             logiran = True
@@ -359,9 +378,10 @@ class RestoreDeletedMailHandler(BaseHandler):
             notice = "Message has been successfully restored!"
             style = "success"
 
-            params = {"notice": notice, "myMessages": myMessages, "today": today, "mailList": mailList,
+            params = {"notice": notice, "myMessages": myMessages,
                       "logiran": logiran, "user": user,
-                      "logout_url": logout_url, "style":style, "weather_info":weather_info}
+                      "logout_url": logout_url, "style":style,}
+            params.update(GetData())
         else:
             params = GoToLogin()
 
@@ -399,7 +419,6 @@ class DeletedHandler(BaseHandler):
         user = users.get_current_user()
         mailList = MailMessage.query(MailMessage.mailDeleted == True).order(-MailMessage.mailDate).fetch()
         today = datetime.datetime.now()
-
         weather_info = FetchWeather()
 
         if user:
@@ -416,6 +435,55 @@ class DeletedHandler(BaseHandler):
         return self.render_template("%s" % self.html, params=params)
 
 
+class WeatherLocationHandler(BaseHandler):
+    def get(self):
+        user = users.get_current_user()
+        city = WeatherLocation.location
+        logging.info(city)
+
+        if user:
+            logiran = True
+            logout_url = users.create_logout_url('/')
+            myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
+
+            params = {"myMessages": myMessages, "logiran": logiran, "user": user,
+                      "logout_url": logout_url, }
+            params.update(GetData())
+        else:
+            params = GoToLogin()
+
+        self.html = "location.html"
+        return self.render_template("%s" % self.html, params=params)
+
+
+    def post(self):
+        # user = users.get_current_user()
+
+
+        city = self.request.get("city")
+        units = "metric"
+        app_key = "35cf7783d824223bb27c01a20ea797b8"
+        url = "http://api.openweathermap.org/data/2.5/weather?q={0}&units={1}&appid={2}".format(city, units, app_key)
+        result = urlfetch.fetch(url)
+        weather_info = json.loads(result.content)
+
+        user = users.get_current_user()
+
+        if user:
+            logiran = True
+            logout_url = users.create_logout_url('/')
+            myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
+
+            params = {"myMessages": myMessages, "logiran": logiran, "user": user,
+                      "logout_url": logout_url, }
+            params.update(GetData())
+        else:
+            params = GoToLogin()
+
+        self.html = "index.html"
+        return self.render_template("%s" % self.html, params=params)
+
+
 app = webapp2.WSGIApplication([
     webapp2.Route('/', MainHandler),
     webapp2.Route('/add', AddMailMessageHandler),
@@ -427,4 +495,5 @@ app = webapp2.WSGIApplication([
     webapp2.Route('/send-message/<message_id:\d+>', SendMessageHandler),
     webapp2.Route('/outbox', OutboxHandler),
     webapp2.Route('/deleted', DeletedHandler),
+    webapp2.Route('/weather-location', WeatherLocationHandler),
 ], debug=True)
