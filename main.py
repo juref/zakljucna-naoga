@@ -59,6 +59,7 @@ def FetchWeather():
 
     return weather
 
+
 def GoToLogin():
     logiran = False
     login_url = users.create_login_url('/')
@@ -73,8 +74,6 @@ def TimeSinceSend(mail):
     timeSinceSendMinutes = str(today - mail.mailDate).split(":")[1]
     timeSinceSendHours = str(today - mail.mailDate).split(":")[0]
     timeSinceSendDays = str(today - mail.mailDate).split(",")[0]
-
-    weather_info = FetchWeather()
 
     if "days" in timeSinceSendDays:
         timeSinceSend = timeSinceSendDays
