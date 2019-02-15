@@ -68,6 +68,28 @@ def GoToLogin():
     return params
 
 
+def TimeSinceSend(mail):
+    today = datetime.datetime.now()
+    timeSinceSendMinutes = str(today - mail.mailDate).split(":")[1]
+    timeSinceSendHours = str(today - mail.mailDate).split(":")[0]
+    timeSinceSendDays = str(today - mail.mailDate).split(",")[0]
+
+    weather_info = FetchWeather()
+
+    if "days" in timeSinceSendDays:
+        timeSinceSend = timeSinceSendDays
+    elif int(timeSinceSendHours) == 0:
+        if int(timeSinceSendMinutes[0]) == 0:
+            timeSinceSend = timeSinceSendMinutes[1] + " minutes"
+        else:
+            timeSinceSend = timeSinceSendMinutes + " minutes"
+
+    else:
+        timeSinceSend = timeSinceSendHours + " hours"
+
+    return timeSinceSend
+
+
 class BaseHandler(webapp2.RequestHandler):
 
     def write(self, *a, **kw):
@@ -255,23 +277,8 @@ class MessageHandler(BaseHandler):
     def get(self, message_id):
         user = users.get_current_user()
         mail = MailMessage.get_by_id(int(message_id))
-        today = datetime.datetime.now()
-        timeSinceSendMinutes = str(today - mail.mailDate).split(":")[1]
-        timeSinceSendHours = str(today - mail.mailDate).split(":")[0]
-        timeSinceSendDays = str(today - mail.mailDate).split(",")[0]
-
         weather_info = FetchWeather()
-
-        if "days" in timeSinceSendDays:
-            timeSinceSend = timeSinceSendDays
-        elif int(timeSinceSendHours) == 0:
-            if int(timeSinceSendMinutes[0]) == 0:
-                timeSinceSend = timeSinceSendMinutes[1] + " minutes"
-            else:
-                timeSinceSend = timeSinceSendMinutes + " minutes"
-
-        else:
-            timeSinceSend = timeSinceSendHours + " hours"
+        timeSinceSend = TimeSinceSend(mail)
 
         if user:
             logiran = True
@@ -279,7 +286,7 @@ class MessageHandler(BaseHandler):
             mail.mailStatus = "read"
             mail.put()
 
-            params = {"mail": mail, "logiran": logiran, "user": user, "logout_url": logout_url, "today": today,
+            params = {"mail": mail, "logiran": logiran, "user": user, "logout_url": logout_url,
                       "timeSinceSend": timeSinceSend, "weather_info": weather_info}
         else:
             params = GoToLogin()
@@ -293,29 +300,13 @@ class SendMessageHandler(BaseHandler):
         user = users.get_current_user()
         mail = MailMessage.get_by_id(int(message_id))
         weather_info = FetchWeather()
-        today = datetime.datetime.now()
-        timeSinceSendMinutes = str(today - mail.mailDate).split(":")[1]
-        timeSinceSendHours = str(today - mail.mailDate).split(":")[0]
-        timeSinceSendDays = str(today - mail.mailDate).split(",")[0]
-
-
-
-        if "days" in timeSinceSendDays:
-            timeSinceSend = timeSinceSendDays
-        elif int(timeSinceSendHours) == 0:
-            if int(timeSinceSendMinutes[0]) == 0:
-                timeSinceSend = timeSinceSendMinutes[1] + " minutes"
-            else:
-                timeSinceSend = timeSinceSendMinutes + " minutes"
-
-        else:
-            timeSinceSend = timeSinceSendHours + " hours"
+        timeSinceSend = TimeSinceSend(mail)
 
         if user:
             logiran = True
             logout_url = users.create_logout_url('/')
 
-            params = {"mail": mail, "logiran": logiran, "user": user, "logout_url": logout_url, "today": today, "timeSinceSend": timeSinceSend, "weather_info": weather_info}
+            params = {"mail": mail, "logiran": logiran, "user": user, "logout_url": logout_url, "timeSinceSend": timeSinceSend, "weather_info": weather_info}
 
         else:
             params = GoToLogin()
