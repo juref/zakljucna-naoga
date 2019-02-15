@@ -9,11 +9,10 @@ class MailMessage(ndb.Model):
     mailBody = ndb.TextProperty()
     mailBodyExcerpt = ndb.StringProperty()
     mailStatus = ndb.StringProperty()
-    mailDate = ndb.DateTimeProperty(auto_now_add=True)
+    mailDate = ndb.DateTimeProperty(auto_now_add = True)
     mailDeleted = ndb.BooleanProperty(default = False)
-    mailOutDeleted = ndb.BooleanProperty(default=False)
+    mailOutDeleted = ndb.BooleanProperty(default = False)
 
 
 class WeatherLocation(ndb.Model):
-    user = ndb.StringProperty()
     location = ndb.StringProperty()

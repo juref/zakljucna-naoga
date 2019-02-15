@@ -40,7 +40,8 @@ jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir), aut
 
 
 def GetData():
-    mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
+    # mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch() Ne dela na GAE
+    mailList = MailMessage.query(MailMessage.mailDeleted == False).fetch()
     today = datetime.datetime.now()
     weather_info = FetchWeather()
 
@@ -115,7 +116,6 @@ class MainHandler(BaseHandler):
 class AddMailMessageHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
-        # mailList = MailMessage.query(MailMessage.mailDeleted == False).fetch()
         task = ""
 
         weather_info = FetchWeather()
@@ -244,7 +244,7 @@ class DeleteMailHandler(BaseHandler):
         # mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch()
         # today = datetime.datetime.now()
 
-        notice = "Message successfully deleted! <a class='alert-link' href='/restore/" + str(mail.key.id()) + "'>Undo delete message</a>"
+        notice = "Message successfully deleted!"
         style = "danger"
 
         logging.info(notice)
@@ -394,8 +394,9 @@ class RestoreDeletedMailHandler(BaseHandler):
 class OutboxHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
-        mailList = MailMessage.query(MailMessage.mailDeleted == False and MailMessage.mailOutDeleted == False).order(
-            -MailMessage.mailDate).fetch()
+        # mailList = MailMessage.query(MailMessage.mailDeleted == False and MailMessage.mailOutDeleted == False).order(
+        #     -MailMessage.mailDate).fetch()
+        mailList = MailMessage.query(MailMessage.mailDeleted == False and MailMessage.mailOutDeleted == False).fetch()
         today = datetime.datetime.now()
 
         weather_info = FetchWeather()
@@ -417,7 +418,8 @@ class OutboxHandler(BaseHandler):
 class DeletedHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
-        mailList = MailMessage.query(MailMessage.mailDeleted == True).order(-MailMessage.mailDate).fetch()
+        # mailList = MailMessage.query(MailMessage.mailDeleted == True).order(-MailMessage.mailDate).fetch()
+        mailList = MailMessage.query(MailMessage.mailDeleted == True).fetch()
         today = datetime.datetime.now()
         weather_info = FetchWeather()
 

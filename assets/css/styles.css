@@ -236,7 +236,6 @@ table.outbox-table td:last-child {
     flex-direction: row;
     flex-wrap: wrap;
     margin-top: 50;
-    height: 50px;
     padding-left: 10px;
     color: #463502;
     font-weight: 400;
@@ -263,6 +262,9 @@ table.outbox-table td:last-child {
 }
 .weather a:hover{
     color: #d54b3d;
+}
+.weather img {
+    margin-bottom: 9px;
 }
 #location {
     text-align: right;
@@ -330,14 +332,20 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 .login-page {
-    margin-top: -50px;
-    padding-top: 50%;
-    background-color: #313131;
     color: #ccc;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
+    position: fixed;
+    margin-top: -65px;
+    margin-left: -180px;
+    height: 130px;
+    width: 360px;
+    top: 50%;
+    left: 50%;
+}
+.login-container {
+    margin-top: -50px;
+    width: 100%;
     height: calc(100% + 50px);
+    background-color: #313131;
 }
 .login-page a {
     font-size: 3.5em;

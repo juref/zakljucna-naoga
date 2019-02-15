@@ -9,7 +9,6 @@
             <div class="col-12 new-padding">
                 <div class="row mb-3 center"></div>
                 <form class="rating-form" method="post">
-
                     <div class="input-group mb-3">
                         <div class="input-group mb-3">
                             <input
@@ -19,7 +18,6 @@
                                 id="mailRecipient"
                                 name="mailRecipient">
                         </div>
-
                         <div class="input-group mb-3">
                             <input
                                 type="text"
@@ -31,7 +29,6 @@
                         <div class="input-group mb-3 mail-compose">
                             <textarea class="form-control" id="froala-editor" name="mailBody"></textarea>
                         </div>
-
                     </div>
                     <input
                         type="hidden"
@@ -43,9 +40,8 @@
                         id="mailSender_ID"
                         name="mailSender_ID"
                         value="{{ user.user_id() }}">
-                    <a class="btn btn-dark" href="/"><< Back</a>
                     <button class="btn btn-dark" type="submit">Send</button>
-
+                    <a class="btn btn-dark" href="/"><< Back</a>
                 </form>
             </div>
         </div>
