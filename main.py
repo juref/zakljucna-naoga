@@ -75,7 +75,11 @@ def TimeSinceSend(mail):
     timeSinceSendHours = str(today - mail.mailDate).split(":")[0]
     timeSinceSendDays = str(today - mail.mailDate).split(",")[0]
 
-    if "days" in timeSinceSendDays:
+    logging.info(timeSinceSendMinutes)
+    logging.info(timeSinceSendHours)
+    logging.info(timeSinceSendDays)
+
+    if "day" in timeSinceSendDays:
         timeSinceSend = timeSinceSendDays
     elif int(timeSinceSendHours) == 0:
         if int(timeSinceSendMinutes[0]) == 0:
