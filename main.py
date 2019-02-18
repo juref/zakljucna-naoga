@@ -39,19 +39,19 @@ template_dir = os.path.join(os.path.dirname(__file__), "templates")
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir), autoescape=False)
 
 
-def GetData(location):
+def GetData():
     # mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch() Ne dela na GAE
     mailList = MailMessage.query(MailMessage.mailDeleted == False).fetch()
     today = datetime.datetime.now()
-    city = location
-    weather_info = FetchWeather(city)
 
-    data = {"mailList": mailList, "today": today, "weather_info": weather_info}
+    data = {"mailList": mailList, "today": today}
 
     return data
 
-def FetchWeather(location):
-    city = location
+
+def FetchWeather(user):
+    weatherData = WeatherData.query(WeatherData.weatherUser == str(user.email())).get()
+    city = weatherData.weatherLocation
     units = "metric"
     app_key = "35cf7783d824223bb27c01a20ea797b8"
     url = "http://api.openweathermap.org/data/2.5/weather?q={0}&units={1}&appid={2}".format(city, units, app_key)
@@ -64,7 +64,6 @@ def FetchWeather(location):
 def GoToLogin():
     logiran = False
     login_url = users.create_login_url('/')
-    # weather_info = FetchWeather()
     params = {"logiran": logiran, "login_url": login_url}
 
     return params
@@ -117,31 +116,15 @@ class MainHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
 
-
-
-
         if user:
             logiran = True
             logout_url = users.create_logout_url('/')
             myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
-
-            ### Weather ###
-            weatherData = WeatherData.query(WeatherData.weatherUser == str(user.email())).get()
-
-            weatherUser = weatherData.weatherUser
-            location = weatherData.weatherLocation
-
-            logging.info(weatherUser)
-            # logging.info(weatherLocation)
-
-            weather_info = FetchWeather(str(location))
-
-            ### END Weather ##
-
+            weather_info = FetchWeather(user)
 
             params = {"myMessages": myMessages, "logiran": logiran, "user": user,
                       "logout_url": logout_url, "weather_info": weather_info}
-            params.update(GetData(location))
+            params.update()
 
         else:
             params = GoToLogin()
@@ -153,9 +136,8 @@ class MainHandler(BaseHandler):
 class AddMailMessageHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
+        weather_info = FetchWeather(user)
         task = ""
-
-        weather_info = FetchWeather()
 
         if user:
             logiran = True
@@ -170,6 +152,7 @@ class AddMailMessageHandler(BaseHandler):
 
     def post(self):
         user = users.get_current_user()
+        weather_info = FetchWeather(user)
         mailRecipient = self.request.get("mailRecipient")
         mailSubject = self.request.get("mailSubject")
         mailBody = self.request.get("mailBody")
@@ -177,8 +160,6 @@ class AddMailMessageHandler(BaseHandler):
         mailSender_ID = self.request.get("mailSender_ID")
         today = datetime.datetime.now()
         mailBodyExcerpt = strip_tags(mailBody)[0:150]
-
-        weather_info = FetchWeather()
 
         newMailMessage = MailMessage(mailRecipient=mailRecipient, mailSender_ID=mailSender_ID, mailSubject=mailSubject,
                                      mailBody=mailBody, mailBodyExcerpt=mailBodyExcerpt, mailSender=mailSender)
@@ -202,9 +183,8 @@ class AddMailMessageHandler(BaseHandler):
 class ReplayMailMessageHandler(BaseHandler):
     def get(self, message_id):
         user = users.get_current_user()
+        weather_info = FetchWeather(user)
         mail = MailMessage.get_by_id(int(message_id))
-
-        weather_info = FetchWeather()
 
         if user:
             logiran = True
@@ -219,6 +199,7 @@ class ReplayMailMessageHandler(BaseHandler):
 
     def post(self, message_id):
         user = users.get_current_user()
+        weather_info = FetchWeather(user)
         mailRecipient = self.request.get("mailRecipient")
         mailSubject = self.request.get("mailSubject")
         mailBody = self.request.get("mailBody")
@@ -226,8 +207,6 @@ class ReplayMailMessageHandler(BaseHandler):
         mailSender_ID = self.request.get("mailSender_ID")
         today = datetime.datetime.now()
         mailBodyExcerpt = strip_tags(mailBody)[0:150]
-
-        weather_info = FetchWeather()
 
         newMailMessage = MailMessage(mailRecipient=mailRecipient, mailSender_ID=mailSender_ID, mailSubject=mailSubject,
                                      mailBody=mailBody, mailBodyExcerpt=mailBodyExcerpt, mailSender=mailSender)
@@ -251,20 +230,19 @@ class ReplayMailMessageHandler(BaseHandler):
 
 class DeleteMailHandler(BaseHandler):
     def get(self, message_id):
+        user = users.get_current_user()
+        weather_info = FetchWeather(user)
         mail = MailMessage.get_by_id(int(message_id))
-
-        weather_info= FetchWeather()
 
         params = {"mail": mail, "weather_info":weather_info}
 
         return self.render_template("delete.html", params=params)
 
     def post(self, message_id):
-        mail = MailMessage.get_by_id(int(message_id))
         user = users.get_current_user()
+        weather_info = FetchWeather(user)
+        mail = MailMessage.get_by_id(int(message_id))
         usermail = user.email()
-
-        weather_info = FetchWeather()
 
         if usermail == mail.mailSender:
             mail.mailOutDeleted = True
@@ -274,8 +252,6 @@ class DeleteMailHandler(BaseHandler):
 
         mail.put()
         time.sleep(1)
-
-        user = users.get_current_user()
 
         notice = "Message successfully deleted!"
         style = "danger"
@@ -298,8 +274,8 @@ class DeleteMailHandler(BaseHandler):
 class MessageHandler(BaseHandler):
     def get(self, message_id):
         user = users.get_current_user()
+        weather_info = FetchWeather(user)
         mail = MailMessage.get_by_id(int(message_id))
-        weather_info = FetchWeather()
         timeSinceSend = TimeSinceSend(mail)
 
         if user:
@@ -320,8 +296,8 @@ class MessageHandler(BaseHandler):
 class SendMessageHandler(BaseHandler):
     def get(self, message_id):
         user = users.get_current_user()
+        weather_info = FetchWeather(user)
         mail = MailMessage.get_by_id(int(message_id))
-        weather_info = FetchWeather()
         timeSinceSend = TimeSinceSend(mail)
 
         if user:
@@ -374,6 +350,7 @@ class RestoreDeletedMailHandler(BaseHandler):
     def get(self, message_id):
         mail = MailMessage.get_by_id(int(message_id))
         user = users.get_current_user()
+        weather_info = FetchWeather(user)
 
         if user:
             logiran = True
@@ -386,9 +363,7 @@ class RestoreDeletedMailHandler(BaseHandler):
             notice = "Message has been successfully restored!"
             style = "success"
 
-            params = {"notice": notice, "myMessages": myMessages,
-                      "logiran": logiran, "user": user,
-                      "logout_url": logout_url, "style":style,}
+            params = {"notice": notice, "myMessages": myMessages, "logiran": logiran, "user": user, "logout_url": logout_url, "style":style, "weather_info":weather_info}
             params.update(GetData())
         else:
             params = GoToLogin()
@@ -402,10 +377,9 @@ class RestoreDeletedMailHandler(BaseHandler):
 class OutboxHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
+        weather_info = FetchWeather(user)
         mailList = MailMessage.query(MailMessage.mailDeleted == False and MailMessage.mailOutDeleted == False).fetch()
         today = datetime.datetime.now()
-
-        weather_info = FetchWeather()
 
         if user:
             logiran = True
@@ -424,9 +398,9 @@ class OutboxHandler(BaseHandler):
 class DeletedHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
+        weather_info = FetchWeather(user)
         mailList = MailMessage.query(MailMessage.mailDeleted == True).fetch()
         today = datetime.datetime.now()
-        weather_info = FetchWeather()
 
         if user:
             logiran = True
