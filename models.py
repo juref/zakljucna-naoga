@@ -14,6 +14,6 @@ class MailMessage(ndb.Model):
     mailOutDeleted = ndb.BooleanProperty(default = False)
 
 
-class WeatherLocation(ndb.Model):
-    user = ndb.StringProperty()
-    location = ndb.StringProperty()
+class WeatherData(ndb.Model):
+    weatherUser = ndb.StringProperty()
+    weatherLocation = ndb.StringProperty()

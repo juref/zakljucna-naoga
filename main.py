@@ -9,7 +9,7 @@ import jinja2
 import webapp2
 import logging
 import json
-from models import MailMessage, WeatherLocation
+from models import MailMessage, WeatherData
 from HTMLParser import HTMLParser
 from google.appengine.api import users, urlfetch
 
@@ -39,18 +39,19 @@ template_dir = os.path.join(os.path.dirname(__file__), "templates")
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir), autoescape=False)
 
 
-def GetData():
+def GetData(location):
     # mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch() Ne dela na GAE
     mailList = MailMessage.query(MailMessage.mailDeleted == False).fetch()
     today = datetime.datetime.now()
-    weather_info = FetchWeather()
+    city = location
+    weather_info = FetchWeather(city)
 
     data = {"mailList": mailList, "today": today, "weather_info": weather_info}
 
     return data
 
-def FetchWeather():
-    city = "Ljubljana"
+def FetchWeather(location):
+    city = location
     units = "metric"
     app_key = "35cf7783d824223bb27c01a20ea797b8"
     url = "http://api.openweathermap.org/data/2.5/weather?q={0}&units={1}&appid={2}".format(city, units, app_key)
@@ -63,8 +64,8 @@ def FetchWeather():
 def GoToLogin():
     logiran = False
     login_url = users.create_login_url('/')
-    weather_info = FetchWeather()
-    params = {"logiran": logiran, "login_url": login_url, "weather_info": weather_info}
+    # weather_info = FetchWeather()
+    params = {"logiran": logiran, "login_url": login_url}
 
     return params
 
@@ -116,14 +117,32 @@ class MainHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
 
+
+
+
         if user:
             logiran = True
             logout_url = users.create_logout_url('/')
             myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
 
+            ### Weather ###
+            weatherData = WeatherData.query(WeatherData.weatherUser == str(user.email())).get()
+
+            weatherUser = weatherData.weatherUser
+            location = weatherData.weatherLocation
+
+            logging.info(weatherUser)
+            # logging.info(weatherLocation)
+
+            weather_info = FetchWeather(str(location))
+
+            ### END Weather ##
+
+
             params = {"myMessages": myMessages, "logiran": logiran, "user": user,
-                      "logout_url": logout_url,}
-            params.update(GetData())
+                      "logout_url": logout_url, "weather_info": weather_info}
+            params.update(GetData(location))
+
         else:
             params = GoToLogin()
 
