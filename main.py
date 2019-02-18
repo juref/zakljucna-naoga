@@ -442,11 +442,6 @@ class WeatherLocationHandler(BaseHandler):
 
     def post(self):
         city = self.request.get("city")
-        units = "metric"
-        app_key = "35cf7783d824223bb27c01a20ea797b8"
-        url = "http://api.openweathermap.org/data/2.5/weather?q={0}&units={1}&appid={2}".format(city, units, app_key)
-        result = urlfetch.fetch(url)
-        weather_info = json.loads(result.content)
 
         user = users.get_current_user()
         weather_user_id = (WeatherData.query(WeatherData.weatherUser == str(user.email())).get()).key.id()
