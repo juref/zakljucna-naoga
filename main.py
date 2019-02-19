@@ -116,13 +116,20 @@ class MainHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
 
-        # weather_user_id = (WeatherData.query(WeatherData.weatherUser == str(user.email())).get()).key.id()
-        # weather_data = WeatherData.get_by_id(int(weather_user_id))
-        #
-        # logging.info(weather_data)
-
         if user:
             logiran = True
+            try:
+                weather_user_id = (WeatherData.query(WeatherData.weatherUser == str(user.email())).get()).key.id()
+
+            except:
+                weatherUser = user.email()
+                weatherLocation = "ljubljana"
+
+                new_weather_data = WeatherData(weatherUser=weatherUser, weatherLocation=weatherLocation)
+                new_weather_data.put()
+
+            time.sleep(1)
+
             logout_url = users.create_logout_url('/')
             myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
             weather_info = FetchWeather(user)
