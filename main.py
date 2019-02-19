@@ -40,8 +40,8 @@ jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir), aut
 
 
 def GetData():
-    # mailList = MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate).fetch() Ne dela na GAE
-    mailList = MailMessage.query(MailMessage.mailDeleted == False).fetch()
+    mailList = (MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate)).fetch() #Ne dela na GAE
+    # mailList = MailMessage.query(MailMessage.mailDeleted == False).fetch()
     today = datetime.datetime.now()
 
     data = {"mailList": mailList, "today": today}
@@ -141,10 +141,9 @@ class MainHandler(BaseHandler):
 
             time.sleep(1)
             logout_url = users.create_logout_url('/')
-            myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
             weather_info = FetchWeather(user)
 
-            params = {"myMessages": myMessages, "logiran": logiran, "user": user,
+            params = {"logiran": logiran, "user": user,
                       "logout_url": logout_url, "weather_info": weather_info}
             params.update(GetData())
         else:
