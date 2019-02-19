@@ -467,7 +467,7 @@ class WeatherLocationHandler(BaseHandler):
 
             if wether_locaton_test["cod"] == "404":
                 user = users.get_current_user()
-                notice = "Location " + city + " unknown! Location has not been stored!"
+                notice = "Location <strong style='font-weight: 800;'>" + city.title() + "</strong> unknown! Location has not been stored!"
                 style = "danger"
                 weather_info = FetchWeather(user)
 
@@ -478,7 +478,7 @@ class WeatherLocationHandler(BaseHandler):
                 weather_data.put()
                 time.sleep(1)
                 weather_info = FetchWeather(user)
-                notice = "Location successfully changed to " + city
+                notice = "Location successfully changed to <strong style='font-weight: 800;'>" + city.title() + "</strong>"
                 style = "success"
 
             logout_url = users.create_logout_url('/')
