@@ -129,15 +129,13 @@ class MainHandler(BaseHandler):
                 new_weather_data.put()
 
             time.sleep(1)
-
             logout_url = users.create_logout_url('/')
             myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
             weather_info = FetchWeather(user)
 
             params = {"myMessages": myMessages, "logiran": logiran, "user": user,
                       "logout_url": logout_url, "weather_info": weather_info}
-            params.update()
-
+            params.update(GetData())
         else:
             params = GoToLogin()
 
@@ -423,7 +421,7 @@ class DeletedHandler(BaseHandler):
                       "logout_url": logout_url, "weather_info":weather_info}
         else:
             params = GoToLogin()
-            
+
         self.html = "deleted.html"
         return self.render_template("%s" % self.html, params=params)
 
