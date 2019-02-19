@@ -61,6 +61,17 @@ def FetchWeather(user):
     return weather
 
 
+def FetchWeatherLoc(location):
+    city = location
+    units = "metric"
+    app_key = "35cf7783d824223bb27c01a20ea797b8"
+    url = "http://api.openweathermap.org/data/2.5/weather?q={0}&units={1}&appid={2}".format(city, units, app_key)
+    result = urlfetch.fetch(url)
+    weather = json.loads(result.content)
+
+    return weather
+
+
 def GoToLogin():
     logiran = False
     login_url = users.create_login_url('/')
@@ -446,24 +457,35 @@ class WeatherLocationHandler(BaseHandler):
         return self.render_template("%s" % self.html, params=params)
 
     def post(self):
-        city = self.request.get("city")
-
         user = users.get_current_user()
-        weather_user_id = (WeatherData.query(WeatherData.weatherUser == str(user.email())).get()).key.id()
-        weather_data = WeatherData.get_by_id(int(weather_user_id))
-
-        weather_data.weatherLocation = city
-        weather_data.put()
-
-        weather_info = FetchWeather(user)
-
         if user:
             logiran = True
+            city = self.request.get("city")
+
+            wether_locaton_test = FetchWeatherLoc(city)
+            logging.info(wether_locaton_test)
+
+            if wether_locaton_test["cod"] == "404":
+                user = users.get_current_user()
+                notice = "Location " + city + " unknown! Location has not been stored!"
+                style = "danger"
+                weather_info = FetchWeather(user)
+
+            else:
+                weather_user_id = (WeatherData.query(WeatherData.weatherUser == str(user.email())).get()).key.id()
+                weather_data = WeatherData.get_by_id(int(weather_user_id))
+                weather_data.weatherLocation = city
+                weather_data.put()
+                time.sleep(1)
+                weather_info = FetchWeather(user)
+                notice = "Location successfully changed to " + city
+                style = "success"
+
             logout_url = users.create_logout_url('/')
             myMessages = MailMessage.query(MailMessage.mailRecipient == user.email())
 
             params = {"myMessages": myMessages, "logiran": logiran, "user": user,
-                      "logout_url": logout_url, "weather_info": weather_info}
+                      "logout_url": logout_url, "weather_info": weather_info, "notice": notice, "style": style}
             params.update(GetData())
         else:
             params = GoToLogin()
