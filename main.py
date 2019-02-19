@@ -40,8 +40,7 @@ jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir), aut
 
 
 def GetData():
-    mailList = (MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate)).fetch() #Ne dela na GAE
-    # mailList = MailMessage.query(MailMessage.mailDeleted == False).fetch()
+    mailList = (MailMessage.query(MailMessage.mailDeleted == False).order(-MailMessage.mailDate)).fetch()
     today = datetime.datetime.now()
 
     data = {"mailList": mailList, "today": today}
@@ -398,7 +397,7 @@ class OutboxHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
         weather_info = FetchWeather(user)
-        mailList = MailMessage.query(MailMessage.mailDeleted == False and MailMessage.mailOutDeleted == False).fetch()
+        mailList = MailMessage.query(MailMessage.mailDeleted == False and MailMessage.mailOutDeleted == False).order(-MailMessage.mailDate).fetch()
         today = datetime.datetime.now()
 
         if user:
@@ -419,7 +418,7 @@ class DeletedHandler(BaseHandler):
     def get(self):
         user = users.get_current_user()
         weather_info = FetchWeather(user)
-        mailList = MailMessage.query(MailMessage.mailDeleted == True).fetch()
+        mailList = MailMessage.query(MailMessage.mailDeleted == True).order(-MailMessage.mailDate).fetch()
         today = datetime.datetime.now()
 
         if user:
